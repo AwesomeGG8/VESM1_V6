@@ -83,3 +83,8 @@ while True:
     elif result == 'T':
         print("IT'S A TIE")
         break
+
+for row in board:
+    for symbol in row:
+        print(symbol, end='')
+    print()
