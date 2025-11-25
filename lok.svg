@@ -23,15 +23,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="0.57502038"
-     inkscape:cx="752.14726"
-     inkscape:cy="382.59514"
+     inkscape:zoom="0.40660081"
+     inkscape:cx="603.78631"
+     inkscape:cy="541.07123"
      inkscape:window-width="1440"
      inkscape:window-height="928"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer4-1-1-3-4-2-6"
+     inkscape:current-layer="layer6"
      showguides="true" />
   <defs
      id="defs1">
@@ -275,56 +275,63 @@
        inkscape:groupmode="layer"
        id="layer6"
        inkscape:label="Row-Buttons"
-       transform="translate(-2.3078965,-151.61779)">
-      <circle
-         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0750117;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
+       transform="translate(-0.80810378,-151.61779)">
+      <ellipse
+         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0669747;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
          id="path4-9-1-6"
-         cx="116.69518"
-         cy="293.09094"
-         r="13.962494"
-         inkscape:label="Button-Row-7" />
-      <circle
-         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0750117;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
+         cx="115.19518"
+         cy="291.59094"
+         inkscape:label="Button-Row-7"
+         rx="12.466514"
+         ry="12.466513" />
+      <ellipse
+         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0669747;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
          id="path4-9-6"
-         cx="86.695183"
-         cy="293.09094"
-         r="13.962494"
-         inkscape:label="Button-Row-6" />
-      <circle
-         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0750117;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
+         cx="85.195183"
+         cy="291.59094"
+         inkscape:label="Button-Row-6"
+         rx="12.466514"
+         ry="12.466513" />
+      <ellipse
+         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0669747;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
          id="path4-4"
-         cx="56.69558"
-         cy="293.09067"
-         r="13.962494"
-         inkscape:label="Button-Row-5" />
-      <circle
-         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0750117;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
+         cx="55.19558"
+         cy="291.59067"
+         inkscape:label="Button-Row-5"
+         rx="12.466514"
+         ry="12.466513" />
+      <ellipse
+         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0669747;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
          id="path4-9-1-0"
-         cx="26.69558"
-         cy="293.09067"
-         r="13.962494"
-         inkscape:label="Button-Row-4" />
-      <circle
-         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0750117;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
+         cx="25.19558"
+         cy="291.59067"
+         inkscape:label="Button-Row-4"
+         rx="12.466514"
+         ry="12.466513" />
+      <ellipse
+         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0669747;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
          id="path4-9-1"
-         cx="-3.3044202"
-         cy="293.09067"
-         r="13.962494"
-         inkscape:label="Button-Row-3" />
-      <circle
-         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0750117;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
+         cx="-4.80442"
+         cy="291.59067"
+         inkscape:label="Button-Row-3"
+         rx="12.466514"
+         ry="12.466513" />
+      <ellipse
+         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0669747;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
          id="path4-9"
-         cx="-33.30442"
-         cy="293.09067"
-         r="13.962494"
-         inkscape:label="Button-Row-2" />
-      <circle
-         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0750117;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
+         cx="-34.80442"
+         cy="291.59067"
+         inkscape:label="Button-Row-2"
+         rx="12.466514"
+         ry="12.466513" />
+      <ellipse
+         style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0669747;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
          id="path4"
-         cx="-63.304024"
-         cy="293.09039"
-         r="13.962494"
-         inkscape:label="Button-Row-1" />
+         cx="-64.804024"
+         cy="291.59039"
+         inkscape:label="Button-Row-1"
+         rx="12.466514"
+         ry="12.466513" />
     </g>
     <g
        inkscape:groupmode="layer"
