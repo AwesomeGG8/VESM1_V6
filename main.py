@@ -1,90 +1,64 @@
-board = [['-' for j in range(7)] for i in range(4)]
+from machine import Pin
+from neopixel import NeoPixel
 
-def is_winner():
-    x_win = False
-    o_win = False
+class state:
+    NONE = 0
+    PLAYER_1 = 1
+    PLAYER_2 = 2
 
-    for j in range(7):
-        column = [board[i][j] for i in range(4)]
-        if column == ['X']*4:
-            x_win = True
-        if column == ['O']*4:
-            o_win = True
+class color:
+    BLACK = [0, 0, 0]
+    WHITE = [255, 255, 255]
+    RED   = [255, 0, 0]
+    GREEN = [0, 255, 0]
+    BLUE  = [0, 0, 255]
 
-    for i in range(4):
-        for j in range(4):
-            row = board[i][j:j+4]
-            if row == ['X']*4:
-                x_win = True
-            if row == ['O']*4:
-                o_win = True
+class game:
+    def __init__(self, led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin):
+        self.rows = 4
+        self.columns = 7
 
-    for x in range(4):
-        diagonal = []
-        for y in range(4):
-            diagonal.append(board[y][x + y])
-            if diagonal == ['X']*4:
-                x_win = True
-            if diagonal == ['O']*4:
-                o_win = True
-        
-    for x in range(6, 2, -1):
-        diagonal = []
-        for y in range(4):
-            diagonal.append(board[y][x - y])
-            if diagonal == ['X']*4:
-                x_win = True
-            if diagonal == ['O']*4:
-                o_win = True
+        self.neo = NeoPixel(Pin(led_board_pin, Pin.OUT), self.rows * self.columns)
+
+        self.buttons = [Pin(button_pin, Pin.IN, Pin.PULL_UP) for button_pin in button_pins]
+        self.lights = [Pin(light_pin, Pin.OUT) for light_pin in light_pins]
+
+        self.player_1_button = Pin(player_1_button_pin, Pin.IN, Pin.PULL_UP)
+        self.player_1_led = Pin(player_1_led_pin, Pin.OUT)
+        self.player_2_button = Pin(player_2_button_pin, Pin.IN, Pin.PULL_UP)
+        self.player_2_led = Pin(player_2_led_pin, Pin.OUT)
+
+
+        self.board = [[state.NONE for _ in range(self.rows)] for _ in range(self.columns)]
+
+    def coord_to_led(self, x, y):
+        if x % 2 == 0:
+            return x * self.rows + self.rows - 1 - y
+        else:
+            return x * self.rows + y
     
-    if x_win and o_win:
-        return 'T'
-    if x_win:
-        return 'X'
-    if o_win:
-        return 'O'
-    
-    return ''
+    def render(self):
+        for x in range(self.rows):
+            for y in range(self.columns):
+                led = self.coord_to_led(x,y)
+                match (self.board[x][y]):
+                    case (state.NONE):
+                        self.neo[led] = color.BLACK
+                    case (state.PLAYER_1):
+                        self.neo[led] = color.RED
+                    case (state.PLAYER_2):
+                        self.neo[led] = color.BLUE
+        self.neo.write()
 
-player = 'X'
-while True:
-    for row in board:
-        for symbol in row:
-            print(symbol, end='')
-        print()
+led_board_pin = 13
+button_pins = [5, 6, 7, 15, 16, 17, 18]
+light_pins = [1, 2, 42, 41, 40, 39, 38]
+player_1_button_pin = 10
+player_1_led_pin = 4
+player_2_button_pin = 21
+player_2_led_pin = 20
 
-    column = int(input())
-    if board[0][column] != '-':
-        for i in range(3, 0, -1):
-            board[i][column] = board[i - 1][column]
-        board[0][column] = player
-    else:
-        for i in range(4):
-            if board[i][column] == '-':
-                board[i][column] = player
+connect_4 = game(led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin)
 
-                if i != 0:
-                    board[i - 1][column] = '-'
-            else:
-                break
-
-    if player == 'X':
-        player = 'O'
-    else:
-        player = 'X'
-
-    result = is_winner()
-    if result == 'X':
-        print("WINNER IS X")
-        break
-    elif result == 'O':
-        print("WINNER IS O")
-        break
-    elif result == 'T':
-        print("IT'S A TIE")
-        break
-
-for row in board:
-    for symbol in row:
-        print(symbol, end='')
-    print()
+connect_4.board[0][0] = state.PLAYER_1
+connect_4.render()
