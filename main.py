@@ -1,20 +1,29 @@
-from machine import Pin
+from machine import Pin, PWM
 from neopixel import NeoPixel
+from time import sleep_ms
 
 class state:
     NONE = 0
     PLAYER_1 = 1
     PLAYER_2 = 2
+    TIE = 3
+
+class winner:
+    NONE = 0
+    PLAYER_1 = 1
+    PLAYER_2 = 2
+    TIE = 3
 
 class color:
-    BLACK = [0, 0, 0]
-    WHITE = [255, 255, 255]
-    RED   = [255, 0, 0]
-    GREEN = [0, 255, 0]
-    BLUE  = [0, 0, 255]
+    BLACK  = [0, 0, 0]
+    WHITE  = [255, 255, 255]
+    RED    = [255, 0, 0]
+    GREEN  = [0, 255, 0]
+    BLUE   = [0, 0, 255]
+    PURPLE = [255, 255, 0]
 
 class game:
-    def __init__(self, led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin):
+    def __init__(self, led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin, speaker_pin):
         self.rows = 4
         self.columns = 7
 
@@ -28,37 +37,209 @@ class game:
         self.player_2_button = Pin(player_2_button_pin, Pin.IN, Pin.PULL_UP)
         self.player_2_led = Pin(player_2_led_pin, Pin.OUT)
 
+        self.speaker = PWM(Pin(speaker_pin), 20000)
 
         self.board = [[state.NONE for _ in range(self.rows)] for _ in range(self.columns)]
+        self.clear()
 
     def coord_to_led(self, x, y):
+        x = self.columns - x - 1
+        y = self.rows - y - 1
         if x % 2 == 0:
             return x * self.rows + self.rows - 1 - y
         else:
             return x * self.rows + y
     
     def render(self):
-        for x in range(self.rows):
-            for y in range(self.columns):
+        for x in range(self.columns):
+            for y in range(self.rows):
                 led = self.coord_to_led(x,y)
-                match (self.board[x][y]):
-                    case (state.NONE):
-                        self.neo[led] = color.BLACK
-                    case (state.PLAYER_1):
-                        self.neo[led] = color.RED
-                    case (state.PLAYER_2):
-                        self.neo[led] = color.BLUE
+                if self.board[x][y] == state.NONE:
+                    self.neo[led] = color.BLACK
+                elif self.board[x][y] == state.PLAYER_1:
+                    self.neo[led] = color.RED
+                elif self.board[x][y] == state.PLAYER_2:
+                    self.neo[led] = color.BLUE
+                elif self.board[x][y] == state.TIE:
+                    self.neo[led] = color.PURPLE
         self.neo.write()
 
+    def place_in_column(self, column, player):
+        if self.board[column][0] == state.NONE:
+            self.board[column][0] = player
+            self.render()
+            sleep_ms(100)
+            for row in range(1, self.rows):
+                if self.board[column][row] != state.NONE:
+                    break
+                self.board[column][row] = self.board[column][row - 1]
+                self.board[column][row - 1] = state.NONE
+
+                self.render()
+                sleep_ms(100)
+        else:
+            self.board[column][self.rows - 1] = state.NONE
+            for row in range(self.rows - 1, 0, -1):
+                self.board[column][row] = self.board[column][row - 1]
+            self.board[column][0] = player
+            self.render()
+            sleep_ms(100)
+
+    def check_buttons(self):
+        values = []
+        for i in range(len(self.buttons)):
+            button = self.buttons[i]
+            values.append(button.value())
+        return values
+
+    def check_winner(self):
+        player_1_win = [state.PLAYER_1 for _ in range(4)]
+        player_2_win = [state.PLAYER_2 for _ in range(4)]
+        player_1_won = False
+        player_2_won = False
+
+        for x in range(self.columns):
+            column = [self.board[x][y] for y in range(self.rows)]
+            if column == player_1_win:
+                player_1_won = True
+            if column == player_2_win:
+                player_2_won = True
+
+        for x in range(self.columns - 4):
+            for y in range(self.rows):
+                row = [self.board[x + i][y] for i in range(4)]
+                if row == player_1_win:
+                    player_1_won = True
+                if row == player_2_win:
+                    player_2_won = True
+                print(row)
+
+        for x in range(self.columns - 3):
+            diagonal = []
+            for y in range(self.rows):
+                diagonal.append(self.board[x + y][y])
+                if diagonal == player_1_win:
+                    player_1_won = True
+                if diagonal == player_2_win:
+                    player_2_won = True
+            
+        for x in range(self.columns - 1, 2, -1):
+            diagonal = []
+            for y in range(self.rows):
+                diagonal.append(self.board[x - y][y])
+                if diagonal == player_1_win:
+                    player_1_won = True
+                if diagonal == player_2_win:
+                    player_2_won = True
+
+        if player_1_won and player_2_won:
+            return winner.TIE
+        elif player_1_won:
+            return winner.PLAYER_1
+        elif player_2_won:
+            return winner.PLAYER_2
+
+        return winner.NONE
+
+    def winner_animation(self, player):
+        for x in range(self.columns):
+            for y in range(self.rows):
+                self.board[x][y] = player
+            self.render()
+            sleep_ms(100)
+        self.clear()
+
+    def tie_animation(self):
+        for x in range(self.columns - 4):
+            for y in range(self.rows):
+                self.board[x][y] = state.PLAYER_1
+                self.board[self.columns - x - 1][y] = state.PLAYER_2
+            self.render()
+            sleep_ms(100)
+
+        for y in range(self.rows):
+            self.board[3][y] = state.TIE
+        self.render()
+        sleep_ms(100)
+
+        for x in range(4, self.columns):
+            for y in range(self.rows):
+                self.board[x][y] = state.TIE
+                self.board[self.columns - x - 1][y] = state.TIE
+            self.render()
+            sleep_ms(100)
+        self.clear()
+
+    def clear_board(self):
+        for x in range(self.columns):
+            for y in range(self.rows):
+                self.board[x][y] = state.NONE
+
+        self.render()
+
+    def clear_button_lights(self):
+        for light in self.lights:
+            light.value(0)
+
+    def clear(self):
+        self.clear_board()
+        self.clear_button_lights()
+        self.player_1_led.value(0)
+        self.player_2_led.value(0)
+
+    def play_game(self):
+        player = state.PLAYER_1
+
+        while self.check_winner() == winner.NONE:
+            if player == state.PLAYER_1:
+                self.player_1_led.value(1)
+                self.player_2_led.value(0)
+            else:
+                self.player_1_led.value(0)
+                self.player_2_led.value(1)
+
+            button_values = self.check_buttons()
+
+            column = -1
+            for i in range(len(button_values)):
+                if button_values[i] == 0:
+                    column = i
+                    break
+
+            if column == -1:
+                continue
+
+            self.lights[column].value(1)
+            self.place_in_column(column, player)
+            self.lights[column].value(0)
+
+            if player == state.PLAYER_1:
+                player = state.PLAYER_2
+            else:
+                player = state.PLAYER_1
+            
+            sleep_ms(500)
+        
+        win = self.check_winner()
+        
+        if win != winner.TIE:
+            self.winner_animation(win)
+        else:
+            self.tie_animation()
+            
+
 led_board_pin = 13
-button_pins = [5, 6, 7, 15, 16, 17, 18]
+button_pins = [5, 6, 7, 15, 16, 18, 17]
 light_pins = [1, 2, 42, 41, 40, 39, 38]
 player_1_button_pin = 10
 player_1_led_pin = 4
 player_2_button_pin = 21
-player_2_led_pin = 20
+player_2_led_pin = 47
+speaker_pin = 37
 
-connect_4 = game(led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin)
-
-connect_4.board[0][0] = state.PLAYER_1
-connect_4.render()
+connect_4 = game(led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin, speaker_pin)
+try:
+    connect_4.play_game()
+except Exception as e:
+    print(e)
+    connect_4.clear()
