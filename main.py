@@ -7,6 +7,7 @@ class state:
     PLAYER_1 = 1
     PLAYER_2 = 2
     TIE = 3
+    POWER_ON = 4
 
 class winner:
     NONE = 0
@@ -41,6 +42,7 @@ class game:
 
         self.board = [[state.NONE for _ in range(self.rows)] for _ in range(self.columns)]
         self.clear()
+        self.power_on()
 
     def coord_to_led(self, x, y):
         x = self.columns - x - 1
@@ -147,7 +149,12 @@ class game:
                 self.board[x][y] = player
             self.render()
             sleep_ms(100)
-        self.clear()
+
+        for y in range(self.rows):
+            for x in range(self.columns):
+                self.board[x][y] = state.NONE
+            self.render()
+            sleep_ms(100)
 
     def tie_animation(self):
         for x in range(self.columns - 4):
@@ -168,7 +175,46 @@ class game:
                 self.board[self.columns - x - 1][y] = state.TIE
             self.render()
             sleep_ms(100)
-        self.clear()
+
+        for y in range(self.rows):
+            for x in range(self.columns):
+                self.board[x][y] = state.NONE
+            self.render()
+            sleep_ms(100)
+
+    def power_on(self):
+        for x in range(self.columns - 4):
+            for y in range(self.rows):
+                self.board[x][y] = state.POWER_ON
+                self.board[self.columns - x - 1][y] = state.POWER_ON
+            self.render()
+            sleep_ms(100)
+
+        for y in range(self.rows):
+            for x in range(self.columns):
+                self.board[x][y] = state.NONE
+            self.render()
+            sleep_ms(100)
+        
+        self.place_in_column(2, state.PLAYER_1)
+        self.place_in_column(3, state.PLAYER_2)
+
+        self.place_in_column(5, state.PLAYER_1)
+        self.place_in_column(2, state.PLAYER_2)
+
+        self.place_in_column(3, state.PLAYER_1)
+        self.place_in_column(4, state.PLAYER_2)
+
+        self.place_in_column(6, state.PLAYER_1)
+        self.place_in_column(6, state.PLAYER_2)
+
+        self.place_in_column(2, state.PLAYER_1)
+        self.place_in_column(3, state.PLAYER_2)
+
+        self.place_in_column(3, state.PLAYER_1)
+        self.place_in_column(3, state.PLAYER_2)
+
+        self.tie_animation()
 
     def clear_board(self):
         for x in range(self.columns):
