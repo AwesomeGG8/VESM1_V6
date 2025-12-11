@@ -94,6 +94,7 @@ class game:
 
 
     def place_in_column(self, column, player):
+        self.beep(220, 512, 100)
         if self.board[column][0] == state.NONE:
             self.board[column][0] = player
             self.render()
@@ -174,6 +175,7 @@ class game:
             for y in range(self.rows):
                 self.board[x][y] = player
             self.render()
+            sleep_ms(100)
 
         for y in range(self.rows):
             for x in range(self.columns):
@@ -294,9 +296,7 @@ class game:
 
             if column == -1:
                 continue
-            
-            self.beep()    
-
+        
             self.lights[column].value(1)
             self.place_in_column(column, player)
             self.lights[column].value(0)
