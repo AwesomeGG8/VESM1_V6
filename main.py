@@ -1,8 +1,10 @@
+# Import
 from machine import Pin, PWM
 from neopixel import NeoPixel
 from time import sleep_ms
 from random import randint
 
+# Klassi fyrir allar stöður
 class state:
     NONE = 0
     PLAYER_1 = 1
@@ -10,12 +12,14 @@ class state:
     TIE = 3
     POWER_ON = 4
 
+# Klassi fyrir sigurvegara
 class winner:
     NONE = 0
     PLAYER_1 = 1
     PLAYER_2 = 2
     TIE = 3
 
+# Klassi fyrir liti
 class color:
     BLACK  = [0, 0, 0]
     WHITE  = [255, 255, 255]
@@ -24,7 +28,10 @@ class color:
     BLUE   = [0, 0, 255]
     PURPLE = [50, 0, 255]
 
+# Klassi fyrir Leikinn
 class game:
+
+    # Tengir við alla gefna pinna, tæmir borðið og spilar power_on
     def __init__(self, led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin, speaker_pin):
         self.rows = 4
         self.columns = 7
@@ -45,6 +52,7 @@ class game:
         self.clear()
         self.power_on()
 
+    # Breytir X og Y í stöðu á led stripinu
     def coord_to_led(self, x, y):
         x = self.columns - x - 1
         y = self.rows - y - 1
@@ -53,6 +61,7 @@ class game:
         else:
             return x * self.rows + y
     
+    # Sýnir það sem á að vera á borði
     def render(self):
         for x in range(self.columns):
             for y in range(self.rows):
@@ -69,12 +78,14 @@ class game:
                     self.neo[led] = color.GREEN
         self.neo.write()
 
+    # Fillir borðið með stöðu og renderar
     def fill_board(self, wanted_state):
         for x in range(self.columns):
             for y in range(self.rows):
                 self.board[x][y] = wanted_state
         self.render()
 
+    # Leikur þar sem spilarar keppa um hver ýtir á takka hraðar, sá sem vinnur byrjar
     def start_game(self):
         sleep_ms(randint(1000, 3000))
 
@@ -82,7 +93,7 @@ class game:
         prev_player_2_state = self.player_2_button.value()
 
         self.fill_board(state.POWER_ON)
-        
+
         while True:
             player_1_state = self.player_1_button.value()
             player_2_state = self.player_2_button.value()
@@ -92,7 +103,11 @@ class game:
             if player_2_state == 0 and prev_player_2_state == 1:
                 return state.PLAYER_2
 
+            prev_player_1_state = player_1_state
+            prev_player_2_state = player_2_state
 
+    # Litur spilarans fer eins langt niður og mögulegt á borði
+    # Ef dálkur er fullur færast allir niður um einn og nýji litur er efstur
     def place_in_column(self, column, player):
         self.beep(220, 512, 100)
         if self.board[column][0] == state.NONE:
@@ -115,6 +130,7 @@ class game:
             self.render()
             sleep_ms(100)
 
+    # Kíkir á alla taka og skilar stöðu þeiira
     def check_buttons(self):
         values = []
         for i in range(len(self.buttons)):
@@ -122,6 +138,7 @@ class game:
             values.append(button.value())
         return values
 
+    # Kíkir hvort einhver hefur fengið 4 í röð og skilar hvort einhver hefur unnið, og hver vann, og hvort það var jafntefli
     def check_winner(self):
         player_1_win = [state.PLAYER_1 for _ in range(4)]
         player_2_win = [state.PLAYER_2 for _ in range(4)]
@@ -170,6 +187,7 @@ class game:
 
         return winner.NONE
 
+    # Fillir borðið með sigurvegara lit og tæmir það
     def winner_animation(self, player):
         for x in range(self.columns):
             for y in range(self.rows):
@@ -183,6 +201,7 @@ class game:
             self.render()
             sleep_ms(100)
 
+    # Fillir einn helming með rauðum hinn með bláan og síðan allt með fjólubláum síðan tæmir það
     def tie_animation(self):
         for x in range(self.columns - 4):
             for y in range(self.rows):
@@ -209,6 +228,7 @@ class game:
             self.render()
             sleep_ms(100)
 
+    # Filiir allt með grænum og sýnir síðan demo leik
     def power_on(self):
         for x in range(self.columns - 4):
             for y in range(self.rows):
@@ -249,6 +269,7 @@ class game:
 
         self.tie_animation()
 
+    # Tæmir borð
     def clear_board(self):
         for x in range(self.columns):
             for y in range(self.rows):
@@ -256,22 +277,26 @@ class game:
 
         self.render()
 
+    # Slökkvir á takka ljósum
     def clear_button_lights(self):
         for light in self.lights:
             light.value(0)
 
+    # Slökkvir á öllu
     def clear(self):
         self.clear_board()
         self.clear_button_lights()
         self.player_1_led.value(0)
         self.player_2_led.value(0)
 
+    # Lætur hátalara spila hljóð
     def beep(self, f, d, s):
         self.speaker.freq(f)
         self.speaker.duty(d)
         sleep_ms(s)
         self.speaker.duty(0)
 
+    # Spilar leik samhvæmt leikja reglum
     def play_game(self):
         player = self.start_game()
         self.winner_animation(player)
@@ -317,6 +342,7 @@ class game:
 
         self.clear()
 
+# Allir pinnar, til að geta breytt í fljótu bragði
 led_board_pin = 13
 button_pins = [5, 6, 7, 15, 16, 18, 17]
 light_pins = [1, 2, 42, 41, 40, 39, 38]
@@ -326,7 +352,10 @@ player_2_button_pin = 21
 player_2_led_pin = 14
 speaker_pin = 37
 
+# Býr til leikinn
 connect_4 = game(led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin, speaker_pin)
+
+# Spilar leikinn þar til slökkt er á spili
 while True:
     try:
         connect_4.play_game()
