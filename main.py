@@ -1,6 +1,7 @@
 from machine import Pin, PWM
 from neopixel import NeoPixel
 from time import sleep_ms
+from random import randint
 
 class state:
     NONE = 0
@@ -21,7 +22,7 @@ class color:
     RED    = [255, 0, 0]
     GREEN  = [0, 255, 0]
     BLUE   = [0, 0, 255]
-    PURPLE = [255, 255, 0]
+    PURPLE = [255, 0, 255]
 
 class game:
     def __init__(self, led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin, speaker_pin):
@@ -64,7 +65,33 @@ class game:
                     self.neo[led] = color.BLUE
                 elif self.board[x][y] == state.TIE:
                     self.neo[led] = color.PURPLE
+                elif self.board[x][y] == state.POWER_ON:
+                    self.neo[led] = color.GREEN
         self.neo.write()
+
+    def fill_board(self, wanted_state):
+        for x in range(self.columns):
+            for y in range(self.rows):
+                self.board[x][y] = wanted_state
+        self.render()
+
+    def start_game(self):
+        sleep_ms(randint(1000, 3000))
+
+        prev_player_1_state = self.player_1_button.value()
+        prev_player_2_state = self.player_2_button.value()
+
+        self.fill_board(state.POWER_ON)
+        
+        while True:
+            player_1_state = self.player_1_button.value()
+            player_2_state = self.player_2_button.value()
+
+            if player_1_state == 0 and prev_player_1_state == 1:
+                return state.PLAYER_1
+            if player_2_state == 0 and prev_player_2_state == 1:
+                return state.PLAYER_2
+
 
     def place_in_column(self, column, player):
         if self.board[column][0] == state.NONE:
@@ -107,14 +134,13 @@ class game:
             if column == player_2_win:
                 player_2_won = True
 
-        for x in range(self.columns - 4):
+        for x in range(self.columns - 3):
             for y in range(self.rows):
                 row = [self.board[x + i][y] for i in range(4)]
                 if row == player_1_win:
                     player_1_won = True
                 if row == player_2_win:
                     player_2_won = True
-                print(row)
 
         for x in range(self.columns - 3):
             diagonal = []
@@ -148,7 +174,6 @@ class game:
             for y in range(self.rows):
                 self.board[x][y] = player
             self.render()
-            sleep_ms(100)
 
         for y in range(self.rows):
             for x in range(self.columns):
@@ -191,6 +216,10 @@ class game:
             sleep_ms(100)
 
         for y in range(self.rows):
+            self.board[3][y] = state.POWER_ON
+        self.render()
+
+        for y in range(self.rows):
             for x in range(self.columns):
                 self.board[x][y] = state.NONE
             self.render()
@@ -198,21 +227,23 @@ class game:
         
         self.place_in_column(2, state.PLAYER_1)
         self.place_in_column(3, state.PLAYER_2)
-
-        self.place_in_column(5, state.PLAYER_1)
+        
+        self.place_in_column(4, state.PLAYER_1)
         self.place_in_column(2, state.PLAYER_2)
-
+        
         self.place_in_column(3, state.PLAYER_1)
         self.place_in_column(4, state.PLAYER_2)
-
-        self.place_in_column(6, state.PLAYER_1)
-        self.place_in_column(6, state.PLAYER_2)
-
+        
+        self.place_in_column(5, state.PLAYER_1)
+        self.place_in_column(5, state.PLAYER_2)
+        
         self.place_in_column(2, state.PLAYER_1)
         self.place_in_column(3, state.PLAYER_2)
-
+        
         self.place_in_column(3, state.PLAYER_1)
         self.place_in_column(3, state.PLAYER_2)
+        
+        sleep_ms(250)
 
         self.tie_animation()
 
@@ -233,10 +264,19 @@ class game:
         self.player_1_led.value(0)
         self.player_2_led.value(0)
 
+    def beep(self, f, d, s):
+        self.speaker.freq(f)
+        self.speaker.duty(d)
+        sleep_ms(s)
+        self.speaker.duty(0)
+
     def play_game(self):
-        player = state.PLAYER_1
+        player = self.start_game()
+        self.winner_animation(player)
+        self.clear()
 
         while self.check_winner() == winner.NONE:
+
             if player == state.PLAYER_1:
                 self.player_1_led.value(1)
                 self.player_2_led.value(0)
@@ -254,17 +294,19 @@ class game:
 
             if column == -1:
                 continue
+            
+            self.beep()    
 
             self.lights[column].value(1)
             self.place_in_column(column, player)
             self.lights[column].value(0)
 
             if player == state.PLAYER_1:
-                player = state.PLAYER_2
+                player = state.PLAYER_2              
             else:
                 player = state.PLAYER_1
-            
-            sleep_ms(500)
+
+            sleep_ms(100)
         
         win = self.check_winner()
         
@@ -272,7 +314,8 @@ class game:
             self.winner_animation(win)
         else:
             self.tie_animation()
-            
+
+        self.clear()
 
 led_board_pin = 13
 button_pins = [5, 6, 7, 15, 16, 18, 17]
@@ -280,12 +323,12 @@ light_pins = [1, 2, 42, 41, 40, 39, 38]
 player_1_button_pin = 10
 player_1_led_pin = 4
 player_2_button_pin = 21
-player_2_led_pin = 47
+player_2_led_pin = 14
 speaker_pin = 37
 
 connect_4 = game(led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin, speaker_pin)
-try:
-    connect_4.play_game()
-except Exception as e:
-    print(e)
-    connect_4.clear()
+while True:
+    try:
+        connect_4.play_game()
+    except Exception as e:
+        connect_4.clear()
