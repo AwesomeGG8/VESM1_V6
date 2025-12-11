@@ -22,7 +22,7 @@ class color:
     RED    = [255, 0, 0]
     GREEN  = [0, 255, 0]
     BLUE   = [0, 0, 255]
-    PURPLE = [255, 0, 255]
+    PURPLE = [50, 0, 255]
 
 class game:
     def __init__(self, led_board_pin, button_pins, light_pins, player_1_button_pin, player_1_led_pin, player_2_button_pin, player_2_led_pin, speaker_pin):
